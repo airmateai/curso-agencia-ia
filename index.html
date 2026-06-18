@@ -1,0 +1,954 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Agencia IA con Fabio — Plataforma</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0c0c0e;
+    --surface: #141417;
+    --surface2: #1c1c21;
+    --border: #2a2a32;
+    --accent: #c9a96e;
+    --accent-dim: rgba(201,169,110,0.12);
+    --accent-dim2: rgba(201,169,110,0.06);
+    --white: #f0f0f0;
+    --muted: #888;
+    --muted2: #555;
+    --green: #4ade80;
+    --green-dim: rgba(74,222,128,0.1);
+    --red: #f87171;
+    --sidebar-w: 280px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--white); min-height: 100vh; }
+
+  /* ── LOGIN ─────────────────────────────────── */
+  #login-screen {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+  }
+  .login-box {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 48px 40px;
+    width: 100%;
+    max-width: 420px;
+    text-align: center;
+  }
+  .login-logo {
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 32px;
+  }
+  .login-box h1 { font-size: 26px; font-weight: 800; margin-bottom: 8px; }
+  .login-box p { color: var(--muted); font-size: 14px; margin-bottom: 32px; line-height: 1.6; }
+  .login-box input {
+    width: 100%;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px 18px;
+    color: var(--white);
+    font-family: inherit;
+    font-size: 15px;
+    margin-bottom: 12px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .login-box input:focus { border-color: var(--accent); }
+  .btn-login {
+    width: 100%;
+    background: var(--accent);
+    color: #0c0c0e;
+    border: none;
+    border-radius: 10px;
+    padding: 15px;
+    font-family: inherit;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: opacity 0.2s;
+    margin-top: 4px;
+  }
+  .btn-login:hover { opacity: 0.88; }
+  .btn-login:disabled { opacity: 0.5; cursor: not-allowed; }
+  .login-msg { font-size: 13px; margin-top: 16px; min-height: 20px; }
+  .login-msg.error { color: var(--red); }
+  .login-msg.success { color: var(--green); }
+  .login-note { font-size: 12px; color: var(--muted2); margin-top: 24px; }
+
+  /* ── APP LAYOUT ─────────────────────────────── */
+  #app { display: none; min-height: 100vh; }
+  #app.visible { display: flex; }
+
+  /* ── SIDEBAR ────────────────────────────────── */
+  .sidebar {
+    width: var(--sidebar-w);
+    min-width: var(--sidebar-w);
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    position: sticky;
+    top: 0;
+    overflow-y: auto;
+  }
+  .sidebar-logo {
+    padding: 24px 20px 20px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--accent);
+    border-bottom: 1px solid var(--border);
+  }
+  .sidebar-progress {
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--border);
+  }
+  .progress-label {
+    font-size: 11px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 8px;
+  }
+  .progress-bar-wrap {
+    background: var(--surface2);
+    border-radius: 4px;
+    height: 6px;
+    overflow: hidden;
+  }
+  .progress-bar-fill {
+    background: var(--accent);
+    height: 100%;
+    border-radius: 4px;
+    transition: width 0.4s ease;
+    width: 0%;
+  }
+  .progress-pct { font-size: 12px; color: var(--accent); margin-top: 6px; font-weight: 600; }
+  .sidebar-nav { flex: 1; padding: 12px 0; }
+  .module-header {
+    padding: 10px 20px 4px;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--muted2);
+  }
+  .lesson-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 9px 20px;
+    cursor: pointer;
+    font-size: 13px;
+    color: var(--muted);
+    transition: all 0.15s;
+    line-height: 1.3;
+    border-left: 3px solid transparent;
+  }
+  .lesson-item:hover { background: var(--accent-dim2); color: var(--white); }
+  .lesson-item.active { background: var(--accent-dim); color: var(--accent); border-left-color: var(--accent); }
+  .lesson-item.completed { color: var(--green); }
+  .lesson-item.completed.active { color: var(--accent); }
+  .lesson-check {
+    width: 16px;
+    min-width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    border: 1.5px solid var(--muted2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 9px;
+  }
+  .lesson-check.done { background: var(--green); border-color: var(--green); color: #000; }
+  .sidebar-user {
+    padding: 16px 20px;
+    border-top: 1px solid var(--border);
+    font-size: 12px;
+    color: var(--muted);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .sidebar-user span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 180px; }
+  .btn-logout {
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    border-radius: 6px;
+    padding: 4px 10px;
+    font-size: 11px;
+    cursor: pointer;
+    font-family: inherit;
+    flex-shrink: 0;
+  }
+  .btn-logout:hover { border-color: var(--muted); color: var(--white); }
+
+  /* ── MAIN CONTENT ───────────────────────────── */
+  .main { flex: 1; overflow-y: auto; }
+  .lesson-view { max-width: 780px; margin: 0 auto; padding: 48px 40px 120px; }
+
+  /* breadcrumb */
+  .breadcrumb { font-size: 12px; color: var(--muted); margin-bottom: 24px; }
+  .breadcrumb span { color: var(--muted2); margin: 0 6px; }
+
+  /* lesson header */
+  .lesson-header h1 { font-size: 30px; font-weight: 800; line-height: 1.2; margin-bottom: 12px; }
+  .lesson-meta { display: flex; gap: 16px; font-size: 12px; color: var(--muted); margin-bottom: 32px; }
+  .lesson-meta i { color: var(--accent); }
+
+  /* video */
+  .video-wrap {
+    position: relative;
+    background: #000;
+    border-radius: 12px;
+    overflow: hidden;
+    margin-bottom: 36px;
+    aspect-ratio: 16/9;
+  }
+  .video-wrap iframe { width: 100%; height: 100%; border: none; }
+  .video-placeholder {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--surface2);
+    border-radius: 12px;
+    margin-bottom: 36px;
+    aspect-ratio: 16/9;
+    color: var(--muted);
+    font-size: 14px;
+    border: 1px dashed var(--border);
+  }
+
+  /* content */
+  .lesson-content { line-height: 1.8; color: #d0d0d0; }
+  .lesson-content h2 { font-size: 20px; font-weight: 700; color: var(--white); margin: 32px 0 12px; }
+  .lesson-content h3 { font-size: 16px; font-weight: 600; color: var(--white); margin: 24px 0 8px; }
+  .lesson-content p { margin-bottom: 16px; }
+  .lesson-content ul, .lesson-content ol { padding-left: 24px; margin-bottom: 16px; }
+  .lesson-content li { margin-bottom: 8px; }
+  .lesson-content strong { color: var(--white); font-weight: 600; }
+  .lesson-content em { color: var(--accent); font-style: normal; font-weight: 500; }
+  .lesson-content pre {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 20px;
+    overflow-x: auto;
+    font-size: 13px;
+    line-height: 1.6;
+    margin-bottom: 20px;
+    font-family: 'Courier New', monospace;
+    color: #c9d1d9;
+  }
+  .lesson-content code {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 2px 6px;
+    font-size: 12px;
+    font-family: 'Courier New', monospace;
+    color: var(--accent);
+  }
+  .lesson-content pre code { background: none; border: none; padding: 0; color: inherit; }
+  .callout {
+    background: var(--accent-dim2);
+    border-left: 3px solid var(--accent);
+    border-radius: 0 8px 8px 0;
+    padding: 16px 20px;
+    margin-bottom: 20px;
+    font-size: 14px;
+  }
+  .callout-error {
+    background: rgba(248,113,113,0.06);
+    border-left-color: var(--red);
+  }
+
+  /* notas */
+  .notes-section { margin-top: 40px; }
+  .notes-section h3 { font-size: 14px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px; }
+  .notes-textarea {
+    width: 100%;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px;
+    color: var(--white);
+    font-family: inherit;
+    font-size: 14px;
+    line-height: 1.6;
+    resize: vertical;
+    min-height: 100px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .notes-textarea:focus { border-color: var(--accent); }
+  .notes-saved { font-size: 12px; color: var(--green); margin-top: 6px; opacity: 0; transition: opacity 0.3s; }
+  .notes-saved.show { opacity: 1; }
+
+  /* preguntas */
+  .quiz-section { margin-top: 48px; border-top: 1px solid var(--border); padding-top: 40px; }
+  .quiz-section h2 { font-size: 18px; font-weight: 700; margin-bottom: 4px; }
+  .quiz-section > p { color: var(--muted); font-size: 14px; margin-bottom: 28px; }
+  .question-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 24px;
+    margin-bottom: 16px;
+  }
+  .question-text { font-size: 15px; font-weight: 500; margin-bottom: 16px; line-height: 1.5; }
+  .option-btn {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--white);
+    border-radius: 8px;
+    padding: 12px 16px;
+    font-family: inherit;
+    font-size: 14px;
+    cursor: pointer;
+    text-align: left;
+    margin-bottom: 8px;
+    transition: all 0.15s;
+  }
+  .option-btn:hover:not(:disabled) { border-color: var(--accent); background: var(--accent-dim2); }
+  .option-btn.correct { border-color: var(--green); background: var(--green-dim); color: var(--green); }
+  .option-btn.wrong { border-color: var(--red); background: rgba(248,113,113,0.08); color: var(--red); }
+  .option-btn:disabled { cursor: default; }
+  .option-letter {
+    width: 22px;
+    min-width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    font-weight: 700;
+  }
+  .question-explanation {
+    display: none;
+    margin-top: 12px;
+    padding: 12px 16px;
+    background: var(--accent-dim2);
+    border-radius: 8px;
+    font-size: 13px;
+    color: #ccc;
+    line-height: 1.6;
+  }
+  .question-explanation.show { display: block; }
+
+  /* nav buttons */
+  .lesson-nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 48px;
+    padding-top: 24px;
+    border-top: 1px solid var(--border);
+    gap: 12px;
+  }
+  .btn-nav {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--white);
+    border-radius: 10px;
+    padding: 12px 20px;
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .btn-nav:hover { border-color: var(--accent); color: var(--accent); }
+  .btn-complete {
+    background: var(--accent);
+    border: none;
+    color: #0c0c0e;
+    border-radius: 10px;
+    padding: 13px 28px;
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: opacity 0.2s;
+  }
+  .btn-complete:hover { opacity: 0.88; }
+  .btn-complete.done { background: var(--green); }
+
+  /* empty / loading */
+  .state-loading, .state-empty {
+    text-align: center;
+    padding: 80px 40px;
+    color: var(--muted);
+  }
+  .spinner {
+    width: 36px;
+    height: 36px;
+    border: 3px solid var(--border);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    margin: 0 auto 16px;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* ── WELCOME SCREEN ─────────────────────────── */
+  .welcome-view { max-width: 680px; margin: 0 auto; padding: 64px 40px; }
+  .welcome-view h1 { font-size: 34px; font-weight: 900; margin-bottom: 16px; line-height: 1.15; }
+  .welcome-view h1 em { color: var(--accent); font-style: normal; }
+  .welcome-view p { color: #bbb; line-height: 1.8; margin-bottom: 20px; font-size: 16px; }
+  .welcome-stats { display: flex; gap: 16px; margin: 32px 0; flex-wrap: wrap; }
+  .stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 20px 24px; flex: 1; min-width: 120px; }
+  .stat-num { font-size: 28px; font-weight: 900; color: var(--accent); }
+  .stat-label { font-size: 12px; color: var(--muted); margin-top: 4px; }
+  .welcome-cta {
+    background: var(--accent);
+    color: #0c0c0e;
+    border: none;
+    border-radius: 12px;
+    padding: 16px 32px;
+    font-family: inherit;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    margin-top: 8px;
+    transition: opacity 0.2s;
+  }
+  .welcome-cta:hover { opacity: 0.88; }
+  .wa-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: #25d366;
+    color: #fff;
+    text-decoration: none;
+    border-radius: 10px;
+    padding: 12px 20px;
+    font-size: 14px;
+    font-weight: 600;
+    margin-top: 16px;
+  }
+  .wa-link:hover { opacity: 0.9; }
+
+  @media (max-width: 768px) {
+    .sidebar { display: none; }
+    .lesson-view, .welcome-view { padding: 24px 20px 80px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ══ LOGIN SCREEN ══ -->
+<div id="login-screen">
+  <div class="login-box">
+    <div class="login-logo">Agencia IA · Fabio Bueno</div>
+    <h1>Accede a tu curso</h1>
+    <p>Introduce tu email y te enviamos un enlace de acceso instantáneo. Sin contraseña, sin complicaciones.</p>
+    <input type="email" id="email-input" placeholder="tu@email.com" autocomplete="email" />
+    <button class="btn-login" id="btn-magic">Enviarme el enlace</button>
+    <div class="login-msg" id="login-msg"></div>
+    <p class="login-note">¿No tienes acceso todavía? <a href="https://wa.me/34650110256?text=Hola%20Fabio,%20quiero%20acceder%20al%20curso" style="color:var(--accent)">Consíguelo aquí →</a></p>
+  </div>
+</div>
+
+<!-- ══ APP ══ -->
+<div id="app">
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">Agencia IA</div>
+    <div class="sidebar-progress">
+      <div class="progress-label">Tu progreso</div>
+      <div class="progress-bar-wrap"><div class="progress-bar-fill" id="prog-bar"></div></div>
+      <div class="progress-pct" id="prog-pct">0%</div>
+    </div>
+    <nav class="sidebar-nav" id="sidebar-nav">
+      <div class="state-loading" style="padding:24px"><div class="spinner"></div></div>
+    </nav>
+    <div class="sidebar-user">
+      <span id="user-email-display"></span>
+      <button class="btn-logout" onclick="logout()">Salir</button>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main" id="main-content">
+    <div class="state-loading" style="padding:80px 40px;text-align:center">
+      <div class="spinner"></div>
+      <p style="color:var(--muted);margin-top:12px">Cargando...</p>
+    </div>
+  </main>
+</div>
+
+<script>
+// ── CONFIG ────────────────────────────────────────
+const SB_URL = 'https://vjofxmfwdybktpwiuanc.supabase.co';
+const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZqb2Z4bWZ3ZHlia3Rwd2l1YW5jIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ0NzU5NDYsImV4cCI6MjA5MDA1MTk0Nn0.ixU-33c0FEkO7F5xjWb3YHkvj_pQuR0gsJETrGA8ZTE'; // anon key
+const SB_SRV = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZqb2Z4bWZ3ZHlia3Rwd2l1YW5jIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3NDQ3NTk0NiwiZXhwIjoyMDkwMDUxOTQ2fQ.08g-CtdJ0BvgE3U4v9JppA_114EN24KBs7iBpUaw9cs';
+const MENTOR_EMAIL = 'airmateai@gmail.com';
+
+// ── STATE ─────────────────────────────────────────
+let currentUser = null;
+let modules = [];
+let lessons = [];
+let progress = new Set(); // lesson ids completados
+let currentLesson = null;
+let noteTimer = null;
+
+// ── SUPABASE HELPERS ──────────────────────────────
+async function sb(table, method = 'GET', query = '', body = null, useService = false) {
+  const key = useService ? SB_SRV : SB_KEY;
+  const res = await fetch(`${SB_URL}/rest/v1/${table}?${query}`, {
+    method,
+    headers: {
+      'apikey': key,
+      'Authorization': `Bearer ${key}`,
+      'Content-Type': 'application/json',
+      'Prefer': body && method !== 'PATCH' && method !== 'DELETE' ? 'return=representation' : 'return=minimal'
+    },
+    body: body ? JSON.stringify(body) : null
+  });
+  if (method === 'GET') return res.json();
+  return res;
+}
+
+// ── AUTH — Magic Link via EmailJS ─────────────────
+// Usamos un token simple guardado en localStorage
+// El magic link real requeriría Supabase Auth nativo con email provider configurado
+// Por ahora: email + verificación de enrollment en DB
+
+async function sendMagicLink() {
+  const email = document.getElementById('email-input').value.trim().toLowerCase();
+  const msg = document.getElementById('login-msg');
+  const btn = document.getElementById('btn-magic');
+  if (!email || !email.includes('@')) {
+    msg.textContent = 'Introduce un email válido.';
+    msg.className = 'login-msg error';
+    return;
+  }
+
+  btn.disabled = true;
+  btn.textContent = 'Verificando...';
+  msg.textContent = '';
+
+  // Verificar si tiene acceso
+  const alumnos = await sb('curso_alumnos', 'GET', `email=eq.${encodeURIComponent(email)}&active=eq.true`);
+
+  if (!Array.isArray(alumnos) || alumnos.length === 0) {
+    msg.textContent = 'Este email no tiene acceso al curso. Contacta con Fabio por WhatsApp.';
+    msg.className = 'login-msg error';
+    btn.disabled = false;
+    btn.textContent = 'Enviarme el enlace';
+    return;
+  }
+
+  // Acceso directo por ahora (en producción se enviaría email con token)
+  const token = btoa(email + ':' + Date.now());
+  localStorage.setItem('curso_session', JSON.stringify({ email, name: alumnos[0].name, token, ts: Date.now() }));
+
+  msg.textContent = '✓ Acceso verificado. Entrando...';
+  msg.className = 'login-msg success';
+
+  setTimeout(() => initApp(email, alumnos[0].name), 800);
+}
+
+document.getElementById('btn-magic').addEventListener('click', sendMagicLink);
+document.getElementById('email-input').addEventListener('keydown', e => { if (e.key === 'Enter') sendMagicLink(); });
+
+function logout() {
+  localStorage.removeItem('curso_session');
+  location.reload();
+}
+
+// ── INIT ──────────────────────────────────────────
+async function boot() {
+  const sess = localStorage.getItem('curso_session');
+  if (sess) {
+    try {
+      const { email, name, ts } = JSON.parse(sess);
+      // Sesión válida por 30 días
+      if (Date.now() - ts < 30 * 24 * 3600 * 1000) {
+        // Verificar que sigue activo en DB
+        const check = await sb('curso_alumnos', 'GET', `email=eq.${encodeURIComponent(email)}&active=eq.true`);
+        if (Array.isArray(check) && check.length > 0) {
+          await initApp(email, name || check[0].name);
+          return;
+        }
+      }
+    } catch(e) {}
+    localStorage.removeItem('curso_session');
+  }
+  document.getElementById('login-screen').style.display = 'flex';
+}
+
+async function initApp(email, name) {
+  currentUser = { email, name };
+  document.getElementById('login-screen').style.display = 'none';
+  document.getElementById('app').classList.add('visible');
+  document.getElementById('user-email-display').textContent = name || email;
+
+  await loadCourse();
+}
+
+// ── LOAD COURSE DATA ──────────────────────────────
+async function loadCourse() {
+  const [mods, less, prog] = await Promise.all([
+    sb('curso_modulos', 'GET', 'published=eq.true&order=order_num.asc'),
+    sb('curso_lecciones', 'GET', 'published=eq.true&order=order_num.asc'),
+    sb('curso_progreso', 'GET', `alumno_email=eq.${encodeURIComponent(currentUser.email)}`)
+  ]);
+
+  modules = Array.isArray(mods) ? mods : [];
+  lessons = Array.isArray(less) ? less : [];
+  progress = new Set((Array.isArray(prog) ? prog : []).map(p => p.lesson_id));
+
+  renderSidebar();
+  updateProgress();
+
+  // Mostrar bienvenida o primera lección sin completar
+  const firstIncomplete = lessons.find(l => !progress.has(l.id));
+  if (firstIncomplete) {
+    renderLesson(firstIncomplete.id);
+  } else if (lessons.length > 0) {
+    renderLesson(lessons[0].id);
+  } else {
+    renderWelcome();
+  }
+}
+
+// ── SIDEBAR ───────────────────────────────────────
+function renderSidebar() {
+  const nav = document.getElementById('sidebar-nav');
+  if (modules.length === 0) { nav.innerHTML = '<div style="padding:20px;color:var(--muted);font-size:13px">El curso se está preparando.</div>'; return; }
+
+  let html = '';
+  modules.forEach(mod => {
+    const modLessons = lessons.filter(l => l.module_id === mod.id);
+    html += `<div class="module-header">${escHtml(mod.title)}</div>`;
+    modLessons.forEach(l => {
+      const done = progress.has(l.id);
+      const active = currentLesson && currentLesson.id === l.id;
+      html += `<div class="lesson-item ${done ? 'completed' : ''} ${active ? 'active' : ''}" onclick="renderLesson('${l.id}')">
+        <div class="lesson-check ${done ? 'done' : ''}">${done ? '✓' : ''}</div>
+        <span>${escHtml(l.title)}</span>
+      </div>`;
+    });
+  });
+
+  // Enlace mentor si es Fabio
+  if (currentUser.email === MENTOR_EMAIL) {
+    html += `<div class="module-header" style="margin-top:16px">Mentor</div>
+    <div class="lesson-item" onclick="renderAdmin()">
+      <div class="lesson-check">★</div>
+      <span>Panel de mentor</span>
+    </div>`;
+  }
+
+  nav.innerHTML = html;
+}
+
+function updateProgress() {
+  const total = lessons.length;
+  const done = progress.size;
+  const pct = total > 0 ? Math.round((done / total) * 100) : 0;
+  document.getElementById('prog-bar').style.width = pct + '%';
+  document.getElementById('prog-pct').textContent = pct + '%';
+}
+
+// ── RENDER LESSON ─────────────────────────────────
+async function renderLesson(lessonId) {
+  const lesson = lessons.find(l => l.id === lessonId);
+  if (!lesson) return;
+  currentLesson = lesson;
+
+  // Actualizar sidebar active state
+  document.querySelectorAll('.lesson-item').forEach(el => el.classList.remove('active'));
+  const activeItem = [...document.querySelectorAll('.lesson-item')].find(el => el.onclick?.toString().includes(lessonId));
+  if (activeItem) activeItem.classList.add('active');
+
+  // Módulo de esta lección
+  const mod = modules.find(m => m.id === lesson.module_id);
+
+  // Cargar preguntas y nota
+  const [questions, nota] = await Promise.all([
+    sb('curso_preguntas', 'GET', `lesson_id=eq.${lessonId}&order=order_num.asc`),
+    sb('curso_notas', 'GET', `alumno_email=eq.${encodeURIComponent(currentUser.email)}&lesson_id=eq.${lessonId}`)
+  ]);
+
+  const notaContent = Array.isArray(nota) && nota.length > 0 ? nota[0].content : '';
+  const isDone = progress.has(lessonId);
+
+  // Lección anterior / siguiente
+  const idx = lessons.findIndex(l => l.id === lessonId);
+  const prev = idx > 0 ? lessons[idx - 1] : null;
+  const next = idx < lessons.length - 1 ? lessons[idx + 1] : null;
+
+  const main = document.getElementById('main-content');
+  main.innerHTML = `
+  <div class="lesson-view">
+    <div class="breadcrumb">${mod ? escHtml(mod.title) : ''}<span>›</span>${escHtml(lesson.title)}</div>
+    <div class="lesson-header">
+      <h1>${escHtml(lesson.title)}</h1>
+      <div class="lesson-meta">
+        ${lesson.duration_min ? `<span>⏱ ${lesson.duration_min} min estimados</span>` : ''}
+        ${isDone ? '<span style="color:var(--green)">✓ Completada</span>' : ''}
+      </div>
+    </div>
+
+    ${lesson.video_url
+      ? `<div class="video-wrap"><iframe src="${escHtml(lesson.video_url)}" allowfullscreen></iframe></div>`
+      : `<div class="video-placeholder">🎬 Vídeo próximamente</div>`
+    }
+
+    <div class="lesson-content">${lesson.content || '<p style="color:var(--muted)">Contenido próximamente.</p>'}</div>
+
+    <!-- Notas -->
+    <div class="notes-section">
+      <h3>Tus notas</h3>
+      <textarea class="notes-textarea" id="notes-ta" placeholder="Apunta aquí lo que quieras recordar de esta lección...">${escHtml(notaContent)}</textarea>
+      <div class="notes-saved" id="notes-saved">Guardado ✓</div>
+    </div>
+
+    <!-- Preguntas -->
+    ${Array.isArray(questions) && questions.length > 0 ? renderQuiz(questions) : ''}
+
+    <!-- Nav -->
+    <div class="lesson-nav">
+      <div>
+        ${prev ? `<button class="btn-nav" onclick="renderLesson('${prev.id}')">← ${escHtml(prev.title)}</button>` : '<span></span>'}
+      </div>
+      <button class="btn-complete ${isDone ? 'done' : ''}" id="btn-complete" onclick="toggleComplete('${lessonId}')">
+        ${isDone ? '✓ Completada' : 'Marcar como completada'}
+      </button>
+      <div>
+        ${next ? `<button class="btn-nav" onclick="renderLesson('${next.id}')">→ ${escHtml(next.title)}</button>` : '<span></span>'}
+      </div>
+    </div>
+  </div>`;
+
+  // Auto-save notas
+  const ta = document.getElementById('notes-ta');
+  ta.addEventListener('input', () => {
+    clearTimeout(noteTimer);
+    noteTimer = setTimeout(() => saveNota(lessonId, ta.value), 1200);
+  });
+
+  main.scrollTop = 0;
+}
+
+function renderQuiz(questions) {
+  let html = `<div class="quiz-section">
+    <h2>Comprueba lo que has aprendido</h2>
+    <p>Responde las preguntas antes de continuar. No se guarda ningún resultado.</p>`;
+
+  questions.forEach((q, qi) => {
+    const opts = Array.isArray(q.options) ? q.options : JSON.parse(q.options || '[]');
+    const letters = ['A','B','C','D'];
+    html += `<div class="question-card" id="q-${qi}">
+      <div class="question-text">${qi+1}. ${escHtml(q.question)}</div>`;
+    opts.forEach((opt, oi) => {
+      html += `<button class="option-btn" onclick="answerQ(${qi}, ${oi}, ${q.correct_index}, '${escHtml(q.explanation || '')}')">
+        <span class="option-letter">${letters[oi]}</span>
+        ${escHtml(opt)}
+      </button>`;
+    });
+    html += `<div class="question-explanation" id="exp-${qi}">${escHtml(q.explanation || '')}</div>
+    </div>`;
+  });
+
+  html += '</div>';
+  return html;
+}
+
+function answerQ(qi, selectedIdx, correctIdx, explanation) {
+  const card = document.getElementById(`q-${qi}`);
+  const btns = card.querySelectorAll('.option-btn');
+  const isCorrect = selectedIdx === correctIdx;
+
+  btns.forEach((btn, i) => {
+    btn.disabled = true;
+    if (i === correctIdx) btn.classList.add('correct');
+    else if (i === selectedIdx && !isCorrect) btn.classList.add('wrong');
+  });
+
+  if (!isCorrect && explanation) {
+    const exp = document.getElementById(`exp-${qi}`);
+    if (exp) exp.classList.add('show');
+  }
+
+  if (isCorrect) {
+    // Avanzar a la siguiente pregunta tras breve pausa
+    setTimeout(() => {
+      const next = document.getElementById(`q-${qi + 1}`);
+      if (next) {
+        next.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        next.style.animation = 'none';
+        next.style.border = '1px solid var(--accent)';
+        setTimeout(() => { next.style.border = '1px solid var(--border)'; next.style.transition = 'border 0.6s'; }, 600);
+      }
+    }, 500);
+  }
+}
+
+// ── PROGRESS ──────────────────────────────────────
+async function toggleComplete(lessonId) {
+  const isDone = progress.has(lessonId);
+  if (isDone) {
+    await sb('curso_progreso', 'DELETE', `alumno_email=eq.${encodeURIComponent(currentUser.email)}&lesson_id=eq.${lessonId}`, null);
+    progress.delete(lessonId);
+  } else {
+    await sb('curso_progreso', 'POST', '', { alumno_email: currentUser.email, lesson_id: lessonId });
+    progress.add(lessonId);
+  }
+  const btn = document.getElementById('btn-complete');
+  if (btn) {
+    btn.textContent = progress.has(lessonId) ? '✓ Completada' : 'Marcar como completada';
+    btn.className = `btn-complete ${progress.has(lessonId) ? 'done' : ''}`;
+  }
+  updateProgress();
+  renderSidebar();
+  // Mantener active
+  document.querySelectorAll('.lesson-item').forEach(el => {
+    if (el.onclick?.toString().includes(lessonId)) el.classList.add('active');
+  });
+}
+
+// ── NOTAS ─────────────────────────────────────────
+async function saveNota(lessonId, content) {
+  await sb('curso_notas', 'POST', '',
+    { alumno_email: currentUser.email, lesson_id: lessonId, content, updated_at: new Date().toISOString() }
+  );
+  // Upsert — si falla por unique constraint, hacemos PATCH
+  const saved = document.getElementById('notes-saved');
+  if (saved) { saved.classList.add('show'); setTimeout(() => saved.classList.remove('show'), 1800); }
+}
+
+// ── WELCOME ───────────────────────────────────────
+function renderWelcome() {
+  const totalLessons = lessons.length;
+  const totalMods = modules.length;
+  const main = document.getElementById('main-content');
+  const firstName = currentUser.name ? currentUser.name.split(' ')[0] : '';
+
+  main.innerHTML = `
+  <div class="welcome-view">
+    <h1>Bienvenido${firstName ? ', ' + escHtml(firstName) : ''}.<br/>Aquí empieza <em>el trabajo real.</em></h1>
+    <p>No te estoy vendiendo el sueño de ganar dinero fácil. Te estoy mostrando exactamente lo que yo hice, los errores que cometí y cómo los habría evitado.</p>
+    <p>Tienes acceso completo a ${totalLessons} lecciones divididas en ${totalMods} módulos, preguntas de repaso, notas personales y acceso directo a mí por WhatsApp.</p>
+    <div class="welcome-stats">
+      <div class="stat-card"><div class="stat-num">${totalMods}</div><div class="stat-label">Módulos</div></div>
+      <div class="stat-card"><div class="stat-num">${totalLessons}</div><div class="stat-label">Lecciones</div></div>
+      <div class="stat-card"><div class="stat-num">∞</div><div class="stat-label">Acceso vitalicio</div></div>
+      <div class="stat-card"><div class="stat-num">1:1</div><div class="stat-label">Mentoría incluida</div></div>
+    </div>
+    <button class="welcome-cta" onclick="renderLesson('${lessons[0]?.id}')">Empezar el curso →</button>
+    <br/>
+    <a class="wa-link" href="https://wa.me/34650110256" target="_blank">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+      Escríbeme en WhatsApp
+    </a>
+  </div>`;
+}
+
+// ── ADMIN PANEL ───────────────────────────────────
+async function renderAdmin() {
+  if (currentUser.email !== MENTOR_EMAIL) return;
+  const main = document.getElementById('main-content');
+  main.innerHTML = '<div class="state-loading" style="padding:80px 40px;text-align:center"><div class="spinner"></div></div>';
+
+  const alumnos = await sb('curso_alumnos', 'GET', 'order=enrolled_at.desc', null, true);
+
+  main.innerHTML = `
+  <div class="lesson-view">
+    <h1 style="margin-bottom:8px">Panel de mentor</h1>
+    <p style="color:var(--muted);font-size:14px;margin-bottom:32px">Gestiona el acceso de tus alumnos.</p>
+
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:24px;margin-bottom:24px">
+      <h3 style="margin-bottom:16px;font-size:15px">Dar acceso a nuevo alumno</h3>
+      <div style="display:flex;gap:10px;flex-wrap:wrap">
+        <input id="new-email" type="email" placeholder="email@alumno.com" style="flex:1;min-width:200px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:10px 14px;color:var(--white);font-family:inherit;font-size:14px;outline:none"/>
+        <input id="new-name" type="text" placeholder="Nombre (opcional)" style="flex:1;min-width:160px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:10px 14px;color:var(--white);font-family:inherit;font-size:14px;outline:none"/>
+        <button onclick="addAlumno()" style="background:var(--accent);color:#0c0c0e;border:none;border-radius:8px;padding:10px 20px;font-family:inherit;font-weight:700;cursor:pointer;font-size:14px">Dar acceso</button>
+      </div>
+      <div id="admin-msg" style="font-size:13px;margin-top:8px;min-height:18px"></div>
+    </div>
+
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden">
+      <div style="padding:16px 20px;border-bottom:1px solid var(--border);font-size:13px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:1px">
+        Alumnos con acceso (${Array.isArray(alumnos) ? alumnos.length : 0})
+      </div>
+      ${Array.isArray(alumnos) && alumnos.length > 0
+        ? alumnos.map(a => `
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 20px;border-bottom:1px solid var(--border);font-size:14px">
+          <div>
+            <div style="font-weight:500">${escHtml(a.name || a.email)}</div>
+            <div style="color:var(--muted);font-size:12px;margin-top:2px">${escHtml(a.email)} · ${new Date(a.enrolled_at).toLocaleDateString('es-ES')}</div>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px">
+            <span style="font-size:11px;padding:3px 8px;border-radius:4px;background:${a.active ? 'var(--green-dim)' : 'rgba(248,113,113,0.1)'};color:${a.active ? 'var(--green)' : 'var(--red)'}">${a.active ? 'Activo' : 'Pausado'}</span>
+            <button onclick="toggleAlumno('${a.id}', ${a.active})" style="background:none;border:1px solid var(--border);color:var(--muted);border-radius:6px;padding:4px 10px;font-size:11px;cursor:pointer;font-family:inherit">${a.active ? 'Pausar' : 'Reactivar'}</button>
+          </div>
+        </div>`).join('')
+        : '<div style="padding:32px;text-align:center;color:var(--muted);font-size:14px">Sin alumnos todavía.</div>'
+      }
+    </div>
+  </div>`;
+}
+
+async function addAlumno() {
+  const email = document.getElementById('new-email').value.trim().toLowerCase();
+  const name = document.getElementById('new-name').value.trim();
+  const msg = document.getElementById('admin-msg');
+  if (!email || !email.includes('@')) { msg.textContent = 'Email inválido.'; msg.style.color = 'var(--red)'; return; }
+
+  const res = await sb('curso_alumnos', 'POST', '', { email, name: name || null }, true);
+  if (res.status === 201 || res.status === 200) {
+    msg.textContent = `✓ ${email} tiene acceso ahora.`; msg.style.color = 'var(--green)';
+    document.getElementById('new-email').value = '';
+    document.getElementById('new-name').value = '';
+    setTimeout(() => renderAdmin(), 1200);
+  } else if (res.status === 409) {
+    msg.textContent = 'Ese email ya tiene acceso.'; msg.style.color = 'var(--accent)';
+  } else {
+    msg.textContent = 'Error al guardar.'; msg.style.color = 'var(--red)';
+  }
+}
+
+async function toggleAlumno(id, currentActive) {
+  await sb(`curso_alumnos?id=eq.${id}`, 'PATCH', '', { active: !currentActive }, true);
+  renderAdmin();
+}
+
+// ── UTIL ──────────────────────────────────────────
+function escHtml(str) {
+  if (!str) return '';
+  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// ── BOOT ──────────────────────────────────────────
+boot();
+</script>
+</body>
+</html>
