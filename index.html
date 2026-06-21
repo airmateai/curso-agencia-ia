@@ -254,10 +254,16 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--white);min-
   .admin-grid{grid-template-columns:1fr}
 }
 @media(max-width:768px){
-  /* sidebar como drawer */
-  .sidebar{display:none;position:fixed;left:0;top:0;bottom:0;z-index:99;width:min(300px,85vw);min-width:0}
+  /* app: quitar flex para que el main ocupe todo el ancho */
+  #app.visible{display:block}
+
+  /* sidebar: fuera del flujo, oculto por defecto */
+  .sidebar{display:none;position:fixed;left:0;top:0;bottom:0;z-index:99;width:min(300px,85vw);min-width:0;height:100%}
   .sidebar.mob-open{display:flex}
   .sb-logo button{display:block}
+
+  /* main ocupa toda la pantalla */
+  .main{min-height:100vh}
 
   /* topbar visible */
   .mob-bar{display:flex}
@@ -265,8 +271,8 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--white);min-
   /* bottom nav visible */
   .bottom-nav{display:block}
 
-  /* contenido con padding para bottom nav */
-  .lesson-view,.map-view,.mentoria-view,.admin-view{padding:20px 16px 100px}
+  /* contenido: full width, padding para topbar y bottom nav */
+  .lesson-view,.map-view,.mentoria-view,.admin-view{padding:16px 16px 100px;max-width:100%}
 
   /* forms */
   .form-grid-2{grid-template-columns:1fr}
@@ -283,11 +289,14 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--white);min-
   .notes-ta{font-size:14px}
 
   /* mapa */
+  .map-hero{margin-bottom:24px}
   .map-hero h1{font-size:24px}
-  .map-stats{grid-template-columns:repeat(2,1fr);gap:8px}
+  .map-stats{grid-template-columns:repeat(2,1fr);gap:8px;margin:20px 0}
   .stat-card{padding:14px 12px}
   .stat-num{font-size:22px}
-  .map-cta{width:100%;text-align:center;padding:14px}
+  .map-cta{width:100%;text-align:center;padding:14px;margin-bottom:24px}
+  .modules-grid{gap:10px}
+  .mod-card-head{padding:16px}
   .mod-card-head h3{font-size:14px}
 
   /* quiz */
