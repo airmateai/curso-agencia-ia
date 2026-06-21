@@ -233,11 +233,19 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--white);min-
 .add-form .form-input{flex:1;min-width:160px}
 
 /* ── MOBILE ── */
-.mob-bar{display:none;background:var(--s1);border-bottom:1px solid var(--border);padding:14px 20px;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50}
+.mob-bar{display:none;background:var(--s1);border-bottom:1px solid var(--border);padding:12px 16px;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50}
 .mob-bar-logo{font-size:10px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:var(--gold)}
-.mob-bar button{background:none;border:1px solid var(--border);color:var(--white);border-radius:8px;padding:7px 12px;font-size:14px;cursor:pointer}
-.sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.8);z-index:98;backdrop-filter:blur(2px)}
+.mob-bar-btn{background:none;border:1px solid var(--border);color:var(--white);border-radius:8px;padding:8px 12px;font-size:16px;cursor:pointer;line-height:1;display:flex;align-items:center;justify-content:center;min-width:38px;min-height:38px}
+.sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:98;backdrop-filter:blur(3px)}
 .sidebar-overlay.open{display:block}
+
+/* bottom nav bar — móvil */
+.bottom-nav{display:none;position:fixed;bottom:0;left:0;right:0;z-index:50;background:var(--s1);border-top:1px solid var(--border);padding:8px 0 max(8px,env(safe-area-inset-bottom))}
+.bottom-nav-inner{display:flex;align-items:center;justify-content:space-around}
+.bnav-item{display:flex;flex-direction:column;align-items:center;gap:3px;padding:4px 12px;cursor:pointer;color:var(--gray2);font-size:9px;font-weight:600;letter-spacing:.03em;text-transform:uppercase;transition:color .15s;min-width:60px;-webkit-tap-highlight-color:transparent}
+.bnav-item:active{color:var(--gold)}
+.bnav-item svg{width:20px;height:20px}
+.bnav-item.active{color:var(--gold)}
 
 @media(max-width:900px){
   .map-stats{grid-template-columns:repeat(2,1fr)}
@@ -246,18 +254,53 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--white);min-
   .admin-grid{grid-template-columns:1fr}
 }
 @media(max-width:768px){
-  .sidebar{display:none;position:fixed;left:0;top:0;bottom:0;z-index:99;width:280px;min-width:280px}
+  /* sidebar como drawer */
+  .sidebar{display:none;position:fixed;left:0;top:0;bottom:0;z-index:99;width:min(300px,85vw);min-width:0}
   .sidebar.mob-open{display:flex}
   .sb-logo button{display:block}
+
+  /* topbar visible */
   .mob-bar{display:flex}
-  .lesson-view,.map-view,.mentoria-view,.admin-view{padding:24px 20px 100px}
+
+  /* bottom nav visible */
+  .bottom-nav{display:block}
+
+  /* contenido con padding para bottom nav */
+  .lesson-view,.map-view,.mentoria-view,.admin-view{padding:20px 16px 100px}
+
+  /* forms */
   .form-grid-2{grid-template-columns:1fr}
-  .lesson-nav{flex-direction:column}
-  .btn-nav,.btn-complete{width:100%;text-align:center}
-  .map-hero h1{font-size:28px}
-  .map-stats{grid-template-columns:repeat(2,1fr)}
   .add-form{flex-direction:column}
   .add-form .form-input{width:100%}
+
+  /* lección */
+  .lesson-view h1{font-size:22px}
+  .lesson-tag{font-size:9px}
+  .lesson-body{font-size:14px}
+  .lesson-body h2{font-size:17px}
+  .lesson-nav{flex-direction:column;gap:10px}
+  .btn-nav,.btn-complete{width:100%;text-align:center;padding:14px}
+  .notes-ta{font-size:14px}
+
+  /* mapa */
+  .map-hero h1{font-size:24px}
+  .map-stats{grid-template-columns:repeat(2,1fr);gap:8px}
+  .stat-card{padding:14px 12px}
+  .stat-num{font-size:22px}
+  .map-cta{width:100%;text-align:center;padding:14px}
+  .mod-card-head h3{font-size:14px}
+
+  /* quiz */
+  .opt-btn{font-size:13px;padding:11px 13px}
+  .q-card{padding:18px}
+
+  /* mentoría */
+  .mentoria-hero h1{font-size:20px}
+  .form-card{padding:20px 16px}
+
+  /* admin */
+  .table-row{flex-direction:column;align-items:flex-start;gap:8px}
+  .admin-stat-num{font-size:22px}
 }
 </style>
 </head>
@@ -282,10 +325,36 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--white);min-
 <!-- APP -->
 <div id="app">
   <div class="mob-bar">
-    <button onclick="toggleMobSidebar()">☰</button>
+    <button class="mob-bar-btn" onclick="toggleMobSidebar()">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+    </button>
     <span class="mob-bar-logo">Agencia IA</span>
-    <button onclick="renderMap()">⊞</button>
+    <button class="mob-bar-btn" onclick="renderMap()">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+    </button>
   </div>
+
+  <!-- BOTTOM NAV -->
+  <nav class="bottom-nav">
+    <div class="bottom-nav-inner">
+      <div class="bnav-item" id="bnav-map" onclick="renderMap()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+        Módulos
+      </div>
+      <div class="bnav-item" id="bnav-continue" onclick="continueCourse()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+        Continuar
+      </div>
+      <div class="bnav-item" id="bnav-ment" onclick="renderMentoria()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        Mentoría
+      </div>
+      <div class="bnav-item" id="bnav-sidebar" onclick="toggleMobSidebar()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+        Temario
+      </div>
+    </div>
+  </nav>
   <div class="sidebar-overlay" id="mob-overlay" onclick="toggleMobSidebar()"></div>
 
   <aside class="sidebar" id="sidebar">
@@ -723,6 +792,23 @@ async function addAlumno(){
 async function toggleAlumno(id,current){await sb(`curso_alumnos?id=eq.${id}`,'PATCH','',{active:!current},true);renderAdmin();}
 
 function esc(str){if(!str)return '';return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+
+function continueCourse(){
+  const next=lessons.find(l=>!progress.has(l.id));
+  if(next)renderLesson(next.id);else renderMap();
+}
+
+function setActiveNav(id){
+  document.querySelectorAll('.bnav-item').forEach(el=>el.classList.remove('active'));
+  const el=document.getElementById(id);if(el)el.classList.add('active');
+}
+
+const _origRenderMap=renderMap;
+renderMap=function(){_origRenderMap();setActiveNav('bnav-map');};
+const _origRenderMentoria=renderMentoria;
+renderMentoria=function(){_origRenderMentoria();setActiveNav('bnav-ment');};
+const _origRenderLesson=renderLesson;
+renderLesson=async function(id){await _origRenderLesson(id);setActiveNav('bnav-continue');};
 
 boot();
 </script>
