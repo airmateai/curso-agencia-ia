@@ -232,6 +232,45 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--white);min-
 .add-form{display:flex;gap:8px;flex-wrap:wrap;align-items:flex-end}
 .add-form .form-input{flex:1;min-width:160px}
 
+/* ── BIENVENIDA ── */
+.welcome-view{max-width:640px;margin:0 auto;padding:60px 40px 120px;text-align:center}
+.welcome-badge{display:inline-flex;align-items:center;gap:6px;background:var(--gold-dim);border:1px solid rgba(201,169,110,0.2);border-radius:20px;padding:6px 14px;font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--gold);margin-bottom:28px}
+.welcome-view h1{font-size:36px;font-weight:900;line-height:1.15;letter-spacing:-.02em;margin-bottom:14px}
+.welcome-view h1 em{font-family:'Playfair Display',serif;font-style:italic;color:var(--gold)}
+.welcome-view p{color:var(--gray1);font-size:15px;line-height:1.8;max-width:480px;margin:0 auto 40px}
+.welcome-list{list-style:none;text-align:left;background:var(--s1);border:1px solid var(--border);border-radius:16px;padding:28px;margin-bottom:36px}
+.welcome-list li{display:flex;align-items:flex-start;gap:12px;padding:12px 0;border-bottom:1px solid var(--border);font-size:14px;line-height:1.6;color:var(--gray1)}
+.welcome-list li:last-child{border-bottom:none;padding-bottom:0}
+.welcome-list li:first-child{padding-top:0}
+.welcome-check{width:22px;min-width:22px;height:22px;border-radius:50%;background:var(--gold-dim);border:1px solid rgba(201,169,110,0.3);display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--gold);margin-top:1px}
+.welcome-cta{background:var(--gold);color:#080809;border:none;border-radius:14px;padding:18px 48px;font-family:'Inter',sans-serif;font-size:16px;font-weight:800;cursor:pointer;transition:all .2s;letter-spacing:.02em;width:100%;max-width:360px}
+.welcome-cta:hover{background:var(--gold2);transform:translateY(-1px)}
+.welcome-footer{font-size:12px;color:var(--gray2);margin-top:16px}
+
+/* ── CERTIFICADO ── */
+.cert-view{max-width:720px;margin:0 auto;padding:52px 40px 120px;text-align:center}
+.cert-wrap{background:var(--s1);border:1px solid var(--border);border-radius:20px;padding:52px 40px;position:relative;overflow:hidden;margin-bottom:28px}
+.cert-wrap::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 80% 60% at 50% 0%,rgba(201,169,110,0.08) 0%,transparent 70%);pointer-events:none}
+.cert-border{position:absolute;inset:12px;border:1px solid rgba(201,169,110,0.15);border-radius:12px;pointer-events:none}
+.cert-logo{font-size:10px;font-weight:700;letter-spacing:4px;text-transform:uppercase;color:var(--gold);margin-bottom:32px}
+.cert-title{font-size:11px;letter-spacing:3px;text-transform:uppercase;color:var(--gray2);margin-bottom:10px}
+.cert-wrap h1{font-family:'Playfair Display',serif;font-size:42px;font-style:italic;color:var(--gold);margin-bottom:8px;line-height:1.1}
+.cert-sub{font-size:13px;color:var(--gray2);margin-bottom:28px;letter-spacing:.04em}
+.cert-name{font-size:28px;font-weight:800;letter-spacing:-.01em;margin-bottom:4px}
+.cert-date{font-size:12px;color:var(--gray2);margin-bottom:36px}
+.cert-divider{width:80px;height:2px;background:linear-gradient(90deg,transparent,var(--gold),transparent);margin:0 auto 28px}
+.cert-course{font-size:12px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--white);margin-bottom:6px}
+.cert-desc{font-size:13px;color:var(--gray2);max-width:360px;margin:0 auto 36px;line-height:1.6}
+.cert-footer{display:flex;align-items:center;justify-content:center;gap:40px;padding-top:24px;border-top:1px solid var(--border)}
+.cert-sig{text-align:center}
+.cert-sig-name{font-size:14px;font-weight:700;margin-bottom:2px}
+.cert-sig-role{font-size:11px;color:var(--gray2);letter-spacing:.04em}
+.cert-actions{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+.btn-share{background:var(--gold);color:#080809;border:none;border-radius:10px;padding:13px 28px;font-family:'Inter',sans-serif;font-size:14px;font-weight:700;cursor:pointer;transition:all .2s}
+.btn-share:hover{background:var(--gold2)}
+.btn-download{background:var(--s2);color:var(--white);border:1px solid var(--border);border-radius:10px;padding:13px 28px;font-family:'Inter',sans-serif;font-size:14px;font-weight:600;cursor:pointer;transition:all .2s}
+.btn-download:hover{border-color:var(--gold);color:var(--gold)}
+
 /* ── MOBILE ── */
 .mob-bar{display:none;background:var(--s1);border-bottom:1px solid var(--border);padding:12px 16px;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50}
 .mob-bar-logo{font-size:10px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:var(--gold)}
@@ -454,6 +493,8 @@ async function initApp(email,name){
   document.getElementById('app').classList.add('visible');
   document.getElementById('user-email-display').textContent=name||email;
   await loadCourse();
+  const firstTime=!localStorage.getItem(`welcomed_${email}`);
+  if(firstTime)renderWelcome();
 }
 
 async function loadCourse(){
@@ -567,7 +608,7 @@ function renderMap(){
       <div class="stat-card"><div class="stat-num">${lessons.length>0?Math.round((totalDone/lessons.length)*100):0}%</div><div class="stat-label">Progreso</div></div>
     </div>
     ${firstIncomplete?`<button class="map-cta" onclick="renderLesson('${firstIncomplete.id}')">${totalDone===0?'Empezar el curso →':'Continuar donde lo dejé →'}</button>`:
-    `<div class="map-complete">🎉 Has completado todo el curso. Agenda tu mentoría mensual abajo.</div>`}
+    `<button class="map-cta" onclick="renderCertificate()" style="background:linear-gradient(135deg,#c9a96e,#e8c98a)">🏆 Ver mi certificado →</button>`}
     <div class="modules-grid">${cards}</div>
   </div>`;
   renderSidebar();
@@ -801,6 +842,69 @@ async function addAlumno(){
 async function toggleAlumno(id,current){await sb(`curso_alumnos?id=eq.${id}`,'PATCH','',{active:!current},true);renderAdmin();}
 
 function esc(str){if(!str)return '';return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+
+function renderWelcome(){
+  currentLesson=null;
+  const name=currentUser.name?currentUser.name.split(' ')[0]:'';
+  document.getElementById('main-content').innerHTML=`
+  <div class="welcome-view">
+    <div class="welcome-badge">✦ Acceso confirmado</div>
+    <h1>Hola, ${esc(name)}.<br/><em>Bienvenido al curso.</em></h1>
+    <p>Esto no es un curso más de YouTube. Es el sistema exacto que uso para facturar con una agencia IA siendo uno solo. Sin código, sin inversión, sin experiencia previa.</p>
+    <ul class="welcome-list">
+      <li><div class="welcome-check">✦</div><div><strong style="color:var(--white)">Consigue tu primer cliente en 30 días</strong><br/>El método de outreach que me funciona ahora mismo en LinkedIn.</div></li>
+      <li><div class="welcome-check">✦</div><div><strong style="color:var(--white)">Construye el panel CRM sin tocar código</strong><br/>Lo mismo que entrego a mis clientes por 500–1.000€ de setup.</div></li>
+      <li><div class="welcome-check">✦</div><div><strong style="color:var(--white)">Automatiza correos, citas y recordatorios</strong><br/>El cliente ve magia. Tú tardas 2 horas en montarlo.</div></li>
+      <li><div class="welcome-check">✦</div><div><strong style="color:var(--white)">Casos reales: Jose Acosta, Costa Norte, Magda</strong><br/>Vídeos con lo que hice exactamente en cada proyecto.</div></li>
+      <li><div class="welcome-check">✦</div><div><strong style="color:var(--white)">1 mentoría mensual conmigo incluida</strong><br/>30 minutos, tú y yo, sin filtros. Tu situación, mis soluciones.</div></li>
+    </ul>
+    <button class="welcome-cta" onclick="startCourse()">Empezar el curso →</button>
+    <p class="welcome-footer">${lessons.length} lecciones · ${modules.filter(m=>m.published!==false).length} módulos · Acceso de por vida</p>
+  </div>`;
+  setActiveNav('bnav-map');
+}
+
+function startCourse(){
+  localStorage.setItem(`welcomed_${currentUser.email}`,'1');
+  const first=lessons.find(l=>!progress.has(l.id));
+  if(first)renderLesson(first.id);else renderMap();
+}
+
+function renderCertificate(){
+  const name=currentUser.name||currentUser.email;
+  const date=new Date().toLocaleDateString('es-ES',{year:'numeric',month:'long',day:'numeric'});
+  document.getElementById('main-content').innerHTML=`
+  <div class="cert-view">
+    <div class="cert-wrap" id="cert-card">
+      <div class="cert-border"></div>
+      <div class="cert-logo">✦ Airmate · Fabio Bueno</div>
+      <div class="cert-title">Certifica que</div>
+      <div class="cert-name">${esc(name)}</div>
+      <div class="cert-date">${esc(date)}</div>
+      <div class="cert-divider"></div>
+      <h1>Ha completado</h1>
+      <div class="cert-sub">con éxito el programa formativo</div>
+      <div class="cert-course">Agencia IA — Fabio Bueno</div>
+      <div class="cert-desc">Construcción y venta de sistemas de automatización con IA para negocios locales</div>
+      <div class="cert-footer">
+        <div class="cert-sig"><div class="cert-sig-name">Fabio Bueno</div><div class="cert-sig-role">Fundador · Airmate AI</div></div>
+      </div>
+    </div>
+    <div class="cert-actions">
+      <button class="btn-share" onclick="shareCert()">Compartir en LinkedIn →</button>
+      <button class="btn-download" onclick="downloadCert()">Descargar PDF</button>
+    </div>
+  </div>`;
+}
+
+function shareCert(){
+  const text=encodeURIComponent(`Acabo de completar el curso Agencia IA de @FabioBueno. He aprendido a construir y vender sistemas de automatización con IA para negocios locales. 🚀 #AgenciaIA #Airmate`);
+  window.open(`https://www.linkedin.com/sharing/share-offsite/?url=https://airmateai.github.io/curso-agencia-ia/&summary=${text}`,'_blank');
+}
+
+function downloadCert(){
+  window.print();
+}
 
 function continueCourse(){
   const next=lessons.find(l=>!progress.has(l.id));
